@@ -88,3 +88,50 @@ La modalità operativa più interessante è quella Joint Stereo, che viene usata
 - Middle/Side Stereo (o MS Stereo), in cui i canali vengono sommati e sottratti e la somma e la differenza vengono trasmessi, sfruttando il fatto che tipicamente i due canali sono uguali per la maggior parte dei casi e la loro somma porta più informazione. Questa è una codifica lossless
 
 - Intensity Stereo Mode, che utilizza una tecnica detta "Joint Frequency Encoding", basata sul principio di localizzazione sonora. L'udito umano è, in maniera preponderante, meno capace di localizzare la provenienza di determinate frequenze, rispetto ad altri animali. Nello specifico, per la localizzazione delle frequenze, gli umani si affidano alle differenze di tempo e di ampiezza inter-aurali. La capacità di distinguere le differenze di tempo inter-aurali è presente solo per le basse frequenze, di conseguenza l'unico modo per localizzare le frequenze alte è sfruttare la sola ampiezza. Sfruttando questa caratteristica è possibile ridurre le dimensioni di un file audio o di uno stream, senza cambiamenti sostanziali nella qualità percepita. Tuttavia, questa tecnica prevede di unire la parte inferiore dello spettro sonoro in un canale unico (riducendo le differenze tra i vari canali) e trasmettere dell'informazione aggiuntiva per consentire a certe regioni dello spettro di ripristinare la differenza di ampiezza inter-aurale (e quindi ottenere di nuovo una localizzazione abbastanza accurata). Tutto ciò può portare a piccolissime distorsioni nell'audio risultante, ma per bitrate bassi si può addirittura ottenere un miglioramento nella qualità percepita. Proprio per via di questo miglioramento, Intensity stereo mode è supportato da diversi codec, tra cui MP3, Opus, Vorbis e AAC.
+
+## MP3
+### Anatomia di un file
+Un file mp3 è suddiviso in frame di 1152 samples ciascuno. Ogni frame ha una durata di 26 ms, quindi circa 38 fps. I frame sono suddivisi in granules da 576 samples ciascuno.
+
+A seconda del bitrate e della frequenza di campionamento, avremo samples più o meno grandi. Nello specifico, la taglia è data da ((144 * bitrate) / (freq. campionamento)) + padding.
+Il padding corrisponde ad 1 byte per frame, inserito per mantenere costante il bitrate. Se questo byte viene inserito, avremo un bit speciale nell'header settato ad 1.
+
+### Layout di un frame
+Un frame è suddiviso in.
+- Header;
+- CRC;
+- Informazione aggiuntiva;
+- Dati principali;
+- Dati accessori.
+
+### Header
+L'header mp3 è lungo 32 bit ed è così strutturato:
+- Informazioni di sincronizzazione (12 bit), utilizzate per poter riprodurre il contenuto senza partire dall'inizio o per sincronizzare l'audio con il flusso video di uno stream;
+- ID (1 bit), identifica la versione di MPEG usata, 1 per MPEG-1, 0 per MPEG-2. Alcune versioni utilizzano 1 bit in meno per la sincronizzazione, in modo da poter distinguere ulteriori versioni di MPEG;
+- Layer (2 bit), indica il layer utilizzato;
+- Bit di protezione (1 bit), se impostato a 0, il frame è protetto da un CRC di 16 bit;
+- Bitrate (4 bit), indica con quanti bit è codificato il frame;
+- Frequenza (2 bit), indica la frequenza di campionamento;
+- Bit di padding (1 bit), indica se è presente o meno 1 byte di padding;
+- Private bit (1 bit), se settato a 1 si utilizza CRC;
+- Modalità  del canale(2 bit), indica la modalità utilizzata;
+- Estensione modalità (solo joint stereo) (2 bit), indicano se Intensity stereo e MS stereo sono attivi o meno;
+- Copyright (1 bit), indica se è possibile copiare il contenuto;
+- Original o Home (1 bit), indica se il frame è nel media originale;
+- Enfasi (2 bit), indica al decodificatore se è necessario de-enfatizzare (re-equalizzare) il suono;
+
+### Informazioni aggiuntive
+Questa parte del frame contiene informazioni circa la decodifica dei dati principali. La taglia dipende dalla modalità del canale.
+
+Sono suddivise come segue: 
+- main_data-begin (9 bit), indica dove cominciano i main data da decodificare. Ciò è necessario, poichè se si utilizza il layer 3, si possono utilizzare eventuali bit liberi per contenere i main data dei frame successivi. Il valore massimo è 4088 bit, utilizzato come offset negativo per ritrovare l'inizio dei main data nei frame precedenti.
+- SCaleFactor Selection Information (scfsi)(4-8 bit), indica se gli scale factors sono utilizzati per tutti i granule di un certo gruppo.
+- side_info_gr0 e side_info_gr1, campi identici utilizzati per le informazioni dei due granule.
+
+(direi che questo livello di dettaglio va bene per i nostri appunti)
+
+### Main data
+
+[WIP]
+
+
