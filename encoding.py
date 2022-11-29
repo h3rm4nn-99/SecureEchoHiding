@@ -1,55 +1,81 @@
 from pydub import AudioSegment
-import bitarray
+from bitarray import bitarray
 import sys
 import fileinput
 import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--message', type=str, required=True)
+parser.add_argument('--filepath', type=str, required=True)
+parser.add_argument('--seed', type=int, required=True)
+parser.add_argument('--a', type=int, required=True)
+args = parser.parse_args()
 
-## insert parsing here
-#a_key #seed #msg #filepath 
+msg = args.message
+filepath = args.filepath
+seed = args.seed
+a_key = args.a
 
+echo_loudness = -10 #dB
+echo_delay = 1 #50ms
+samples_per_slice = 5000
 
-def next_key_chunk(current_key_chunk,a_key):
+def next_key_chunk(current_key_chunk, a_key) -> int:
     return (a_key * current_key_chunk + 2 * a_key)
 
-def gen_r_sequence(sequence_length):
-    R_sequence = bitarray(sequence_length)
-    for i in range():
-        next_key_chunk = next_key_chunk(current_key_chunk, a_key)
-        if next_key_chunk % 6 > 2:
+def gen_r_sequence(length) -> bitarray:
+    R_sequence = bitarray(length)
+    current_key_chunk = seed
+    for i in range(length):
+        current_key_chunk = next_key_chunk(current_key_chunk, a_key)
+        if current_key_chunk % 6 > 2:
             R_sequence[i] = True
-        elif next_key_chunk % 6 <=2:
+        elif current_key_chunk % 6 <= 2:
             R_sequence[i] = False
     return R_sequence
 
+message_bitarray = bitarray(msg)
+message_length = len(message_bitarray)
 
-samples_per_slice=5000 #tbd #controllare da header mp3 quando si va a leggere?
+r_sequence = gen_r_sequence(message_length)
 
-
-msg_bitarray = bitarray()
-msg_bitarray.fromstring(msg)
-
-msg_length = len(msg_bitarray)
-
-current_key_chunk = seed 
-
-r_sequence = gen_r_sequence(msg_length)
-
-original_track = AudioSegment.from_file(filepath, format="mp3")
+original_track = AudioSegment.from_mp3(filepath)
 echoed_track = AudioSegment.empty()
 
-echo_loudness = -10 #dB
+number_of_frames = int(original_track.frame_count())
+available_bits= number_of_frames / samples_per_slice
 
-echo_delay = 1 #50ms????????????????????????????????????????????????? WTH??????
-
-n_frames = int(original_track.frame_count())
-
-available_bits= n_frames/samples_per_slice  ##?????
-
-if(available_bits < msg_length):
-    print("Error?")
+if available_bits < message_length:
+    print("Non ci sono abbastanza bit disponiili per nascondere un messaggio di lunghezza " + str(message_length))
     sys.exit(0)
 
 count = 0
-for i in range (0,msg_length):
+for i in range (0, message_length):
+    current_slice_start = i * samples_per_slice
+    current_slice_end = (i + 1) * samples_per_slice
+    count += samples_per_slice
+
+    slice_to_process = AudioSegment(original_track).get_sample_slice(current_slice_start, current_slice_end)
+
+    processed_slice = None
+    if r_sequence[i]:
+        if message_bitarray[i]:
+            processed_slice = slice_to_process.get_array_of_samples()
+        else:
+            processed_slice = slice_to_process.overlay(slice_to_process.apply_gain(echo_loudness), position=echo_delay)
+            processed_slice = processed_slice.get_array_of_samples()
+    else:
+        if message_bitarray[i]:
+            processed_slice = slice_to_process.overlay(slice_to_process.apply_gain(echo_loudness), position=echo_delay)
+            processed_slice = processed_slice.get_array_of_samples()
+        else:
+            processed_slice = slice_to_process.get_array_of_samples()
     
+    echoed_track = echoed_track + AudioSegment(original_track)._spawn(processed_slice)
+
+# i samples residui vengono lasciati intatti e ricopiati nella traccia audio modificata
+
+echoed_track = echoed_track + AudioSegment(original_track).get_sample_slice(count, number_of_frames)
+echoed_track.export("echoed_track.wav", format='wav')
+
+sys.exit(0)
