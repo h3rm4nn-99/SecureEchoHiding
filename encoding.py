@@ -1,4 +1,4 @@
-import pydub
+from pydub import AudioSegment
 import bitarray
 import sys
 import fileinput
@@ -23,13 +23,13 @@ def gen_r_sequence(sequence_length):
     return R_sequence
 
 
-samples_for_slice=5000 #tbd #controllare da header mp3 quando si va a leggere?
+samples_per_slice=5000 #tbd #controllare da header mp3 quando si va a leggere?
 
 
 msg_bitarray = bitarray()
 msg_bitarray.fromstring(msg)
 
-msg_length = len(msg_bittarray)
+msg_length = len(msg_bitarray)
 
 current_key_chunk = seed 
 
@@ -51,6 +51,6 @@ if(available_bits < msg_length):
     sys.exit(0)
 
 count = 0
-for i in range (0,msg_lenght):
+for i in range (0,msg_length):
     
 
