@@ -1,47 +1,42 @@
 from pydub import AudioSegment
-import utility
+from bitarray import bitarray
+import fileinput
 import argparse
+import utils
+import numpy
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--filepath', type=str, required=True)
+parser.add_argument('--filepath_encoded', type=str, required=True)
+parser.add_argument('--seed', type=int, required=True)
+parser.add_argument('--a', type=int, required=True)
 args = parser.parse_args()
 
 filepath = args.filepath
+filepath_encoded = args.filepath_encoded
+seed = args.seed
+a_key = args.a
 
 samples_per_slice = 5000
 
-original_track = AudioSegment.from_mp3(filepath)
-original_track_mono = original_track.split_to_mono()
-left_channel_track = original_track_mono[0]
-left_channel_samples = left_channel_track.get_array_of_samples()
+original_track = AudioSegment.from_wav(filepath)
+encoded_track = AudioSegment.from_wav(filepath_encoded)
 
-number_of_frames = original_track.frame_count()
-available_bits= number_of_frames / samples_per_slice
+original_samples = original_track.get_array_of_samples()
+encoded_samples = encoded_track.get_array_of_samples()
 
-count = 0
-counter_to_8 = 0
+message_length = len(original_samples) / samples_per_slice # lunghezza massima
 
-for i in range (0, available_bits):
-    e_values = extract_e(count, i, left_channel_samples)
+r_sequence = utils.gen_r_sequence(message_length, seed, a_key)
 
-    Emin = e_values[0][0]
-    Emid = e_values[1][0]
-    Emax = e_values[2][0]
+message = ""
+for i in range (0, len(original_samples), samples_per_slice):
+    if original_samples[i] != encoded_samples[i]:
+        if r_sequence[i]:
+            message += "1"
+        else:
+            message += "0"
 
-    A = Emax - Emin
-    B = Emid - Emin
-
-    if A >= B:
-        print("1", end="")
-    if B > A:
-        print("0", end="")
-
-    count += samples_per_slice
-
-    if counter_to_8 == 7:
-        print("")
-        counter_to_8 = 0
-    else:
-        counter_to_8 += 1
-
+print("Messaggio decodificato: " + message)
 
