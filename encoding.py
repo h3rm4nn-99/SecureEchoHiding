@@ -14,7 +14,7 @@ def next_key_chunk(current_key_chunk,a_key):
 
 def gen_r_sequence(sequence_length):
     R_sequence = bitarray(sequence_length)
-    for i in range()
+    for i in range():
         next_key_chunk = next_key_chunk(current_key_chunk, a_key)
         if next_key_chunk % 6 > 2:
             R_sequence[i] = True
@@ -53,4 +53,3 @@ if(available_bits < msg_length):
 count = 0
 for i in range (0,msg_length):
     
-
