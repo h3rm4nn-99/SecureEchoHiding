@@ -21,7 +21,8 @@ echo_loudness = -10 #dB
 echo_delay = 1 #50ms
 samples_per_slice = 5000
 
-message_bitarray = bitarray(msg)
+message_bitarray = bitarray()
+message_bitarray.frombytes(msg.encode('utf-8'))
 message_length = len(message_bitarray)
 
 r_sequence = utils.gen_r_sequence(message_length, seed, a_key)
@@ -63,6 +64,6 @@ for i in range (0, message_length):
 # i samples residui vengono lasciati intatti e ricopiati nella traccia audio modificata
 
 echoed_track = echoed_track + AudioSegment(original_track).get_sample_slice(count, number_of_frames)
-echoed_track.export("echoed_track.wav", format='wav')
+echoed_track.export("./output/echoed_track.wav", format='wav')
 
 sys.exit(0)
