@@ -1,9 +1,7 @@
 from pydub import AudioSegment
 from bitarray import bitarray
-import fileinput
 import argparse
 import utils
-import numpy
 import sys
 
 parser = argparse.ArgumentParser()
@@ -39,4 +37,4 @@ for i in range (0, len(original_samples), samples_per_slice):
             message += "0"
 
 print("Messaggio decodificato: " + message)
-
+sys.exit(0)
