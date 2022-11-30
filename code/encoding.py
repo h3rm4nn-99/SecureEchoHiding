@@ -34,6 +34,8 @@ for i in range(0, frame_da_modificare):
     else:
         R_sequence[i] = False
 print("ERRE " + str(len(R_sequence)))
+print(str(R_sequence))
+
 echoed_song = AudioSegment.empty()
 original_song = AudioSegment.from_wav(filepath)
 
@@ -70,5 +72,4 @@ for i in range(0, frame_da_modificare):
         echoed_song = echoed_song + original_song._spawn(echoed)
 
 echoed_song = echoed_song + original_song.get_sample_slice(count, original_song_frame_number)
-
 echoed_song.export('echoed_song.wav', format='wav')
