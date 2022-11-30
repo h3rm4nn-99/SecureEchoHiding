@@ -2,8 +2,6 @@ from pydub import AudioSegment
 from bitarray import bitarray
 import sys
 import argparse
-import os
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--message', type=str, required=True)
@@ -17,7 +15,7 @@ a_key = int(args.a)
 filepath = args.filepath
 message = args.message
 
-samples_per_frame = 5000
+samples_per_frame = 1024
 
 message_size = len(message)
 
@@ -33,16 +31,15 @@ for i in range(0, frame_da_modificare):
         R_sequence[i] = True
     else:
         R_sequence[i] = False
-print("ERRE " + str(len(R_sequence)))
-print(str(R_sequence))
 
 echoed_song = AudioSegment.empty()
 original_song = AudioSegment.from_wav(filepath)
+original_song = original_song.split_to_mono()[0]
 
 loudness = -10
 delay = 1
 
-original_song_frame_number = int(original_song.frame_count())
+original_song_frame_number = int(len(original_song.get_array_of_samples()))
 available_bits = original_song_frame_number / samples_per_frame
 
 if (available_bits < frame_da_modificare):
@@ -54,22 +51,18 @@ for i in range(0, frame_da_modificare):
     start_index = i * samples_per_frame
     end_index = (i+1) * samples_per_frame
     count += samples_per_frame
-
-    porzione_eco = original_song.get_sample_slice(start_index, end_index)
-    if i < frame_da_modificare:
-        if R_sequence[i]:
-            if message_bitarray[i]:
-                echoed = porzione_eco.get_array_of_samples()
-            else:
-                echoed = porzione_eco.overlay(porzione_eco.apply_gain(loudness), position=delay)
-                echoed = echoed.get_array_of_samples()
-        else:
-            if message_bitarray[i]:
-                echoed = porzione_eco.overlay(porzione_eco.apply_gain(loudness), position=delay)
-                echoed = echoed.get_array_of_samples()
-            else:
-                echoed = porzione_eco.get_array_of_samples()
-        echoed_song = echoed_song + original_song._spawn(echoed)
+    frame_da_modificare = original_song.get_sample_slice(start_index, end_index)
+    if R_sequence[i]:
+        if not message_bitarray[i]:
+            frame_da_modificare = frame_da_modificare.overlay(frame_da_modificare.apply_gain(loudness), position=delay)
+    else:
+        if message_bitarray[i]:
+            frame_da_modificare = frame_da_modificare.overlay(frame_da_modificare.apply_gain(loudness), position=delay)
+    print("Lunghezza frame processato: " + str(len(frame_da_modificare.get_array_of_samples())))
+    echoed_song = echoed_song + frame_da_modificare
 
 echoed_song = echoed_song + original_song.get_sample_slice(count, original_song_frame_number)
+
+print("Lunghezza traccia originale " + str(len(original_song.get_array_of_samples())))
+print("Lunghezza traccia modificata " + str(len(echoed_song.get_array_of_samples())))
 echoed_song.export('echoed_song.wav', format='wav')
