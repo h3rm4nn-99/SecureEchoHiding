@@ -1,7 +1,7 @@
 from pydub import AudioSegment
 from bitarray import bitarray
 import argparse
-import utils
+import utils as utils
 import sys
 
 parser = argparse.ArgumentParser()
