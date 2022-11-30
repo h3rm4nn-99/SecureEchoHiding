@@ -4,6 +4,7 @@ import utils as utils
 import sys
 import fileinput
 import argparse
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--message', type=str, required=True)
@@ -43,7 +44,7 @@ for i in range (0, message_length):
     current_slice_end = (i + 1) * samples_per_slice
     count += samples_per_slice
 
-    slice_to_process = AudioSegment(original_track).get_sample_slice(current_slice_start, current_slice_end)
+    slice_to_process = original_track.get_sample_slice(current_slice_start, current_slice_end)
 
     processed_slice = None
     if r_sequence[i]:
@@ -59,11 +60,13 @@ for i in range (0, message_length):
         else:
             processed_slice = slice_to_process.get_array_of_samples()
     
-    echoed_track = echoed_track + AudioSegment(original_track)._spawn(processed_slice)
+    echoed_track = echoed_track + original_track._spawn(processed_slice)
 
 # i samples residui vengono lasciati intatti e ricopiati nella traccia audio modificata
 
-echoed_track = echoed_track + AudioSegment(original_track).get_sample_slice(count, number_of_frames)
+echoed_track = echoed_track + original_track.get_sample_slice(count, number_of_frames)
+if not os.path.exists('./output'):
+    os.mkdir('./output')
 echoed_track.export("./output/echoed_track.wav", format='wav')
 
 sys.exit(0)
