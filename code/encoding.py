@@ -51,18 +51,37 @@ for i in range(0, frame_da_modificare):
     start_index = i * samples_per_frame
     end_index = (i+1) * samples_per_frame
     count += samples_per_frame
+    
     frame_da_modificare = original_song.get_sample_slice(start_index, end_index)
+    
     if R_sequence[i]:
         if not message_bitarray[i]:
             frame_da_modificare = frame_da_modificare.overlay(frame_da_modificare.apply_gain(loudness), position=delay)
     else:
         if message_bitarray[i]:
             frame_da_modificare = frame_da_modificare.overlay(frame_da_modificare.apply_gain(loudness), position=delay)
-    print("Lunghezza frame processato: " + str(len(frame_da_modificare.get_array_of_samples())))
+    
+    frame_da_modificare_array = frame_da_modificare.get_array_of_samples()
+    frame_da_modificare_length = len(frame_da_modificare.get_array_of_samples())
+    
+    if frame_da_modificare_length < samples_per_frame:
+        to_append_samples = frame_da_modificare_array[len(frame_da_modificare_array) - (samples_per_frame - len(frame_da_modificare_array)):]
+        to_append = AudioSegment(data=to_append_samples.tobytes(), sample_width = original_song.sample_width, frame_rate = original_song.frame_rate, channels=1)
+        frame_da_modificare = frame_da_modificare + to_append
+
     echoed_song = echoed_song + frame_da_modificare
+    
 
 echoed_song = echoed_song + original_song.get_sample_slice(count, original_song_frame_number)
 
 print("Lunghezza traccia originale " + str(len(original_song.get_array_of_samples())))
 print("Lunghezza traccia modificata " + str(len(echoed_song.get_array_of_samples())))
+
+print("Lunghezza traccia originale " + str(len(original_song)))
+print("Lunghezza traccia modificata " + str(len(echoed_song)))
+
+print("Lunghezza messaggio: " + str(len(message_bitarray)))
+print("Messaggio: " + str(message_bitarray))
+
 echoed_song.export('echoed_song.wav', format='wav')
+original_song.export('mono_original_song.wav', format='wav')
