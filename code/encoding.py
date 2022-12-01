@@ -32,6 +32,8 @@ for i in range(0, frame_da_modificare):
     else:
         R_sequence[i] = False
 
+print("KEY ENCODER " + str(R_sequence))
+
 echoed_song = AudioSegment.empty()
 original_song = AudioSegment.from_wav(filepath)
 original_song = original_song.split_to_mono()[0]
