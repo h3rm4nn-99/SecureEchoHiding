@@ -55,7 +55,7 @@ print("KEY DECODER " + str(R_sequence))
 count = 0
 cleartext_message = ''
 i = 0
-while count < 32:
+while count < message_length:
     start_index = i * samples_per_frame
     end_index = (i + 1) * samples_per_frame
     i += 1
