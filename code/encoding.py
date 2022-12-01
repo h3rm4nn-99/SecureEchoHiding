@@ -1,7 +1,8 @@
 from pydub import AudioSegment
 from bitarray import bitarray
-import sys
 import argparse
+import sys
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--message', type=str, required=True)
@@ -76,14 +77,13 @@ for i in range(0, frame_da_modificare):
 
 echoed_song = echoed_song + original_song.get_sample_slice(count, original_song_frame_number)
 
-print("Lunghezza traccia originale " + str(len(original_song.get_array_of_samples())))
-print("Lunghezza traccia modificata " + str(len(echoed_song.get_array_of_samples())))
-
-print("Lunghezza traccia originale " + str(len(original_song)))
-print("Lunghezza traccia modificata " + str(len(echoed_song)))
+print("Lunghezza traccia originale " + str(len(original_song.get_array_of_samples())) + " samples, " + str(len(original_song)) + " ms")
+print("Lunghezza traccia modificata " + str(len(echoed_song.get_array_of_samples())) + " samples, " + str(len(echoed_song)) + " ms")
 
 print("Lunghezza messaggio: " + str(len(message_bitarray)))
 print("Messaggio: " + str(message_bitarray))
 
-echoed_song.export('echoed_song.wav', format='wav')
-original_song.export('mono_original_song.wav', format='wav')
+
+if not os.path.exists("output"):
+    os.mkdir("output")
+echoed_song.export('./output/echoed_song.wav', format='wav')
