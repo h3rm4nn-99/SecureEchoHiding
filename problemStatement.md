@@ -17,7 +17,7 @@ Allo scopo di questo progetto, si è deciso di implementare la prima tecnica
 ### Echo Hiding
 
 Il processo di echo hiding funziona utilizzando un algoritmo matematico per "inserire" i dati nascosti nel file audio. \
-L'algoritmo analizza l'audio e inserisce i dati in modo tale da non essere facilmente individuati dall'orecchio umano andando ad inserire un echo nella traccia. \
+L'algoritmo analizza l'audio e inserisce i dati in modo tale da non essere facilmente individuati dall'orecchio umano andando ad inserire un echo nella traccia. 
 
 ### Lavoro proposto
 
