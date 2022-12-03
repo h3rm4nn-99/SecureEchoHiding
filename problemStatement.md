@@ -1,7 +1,7 @@
-# Data Audio Hiding
+# Data Echo Hiding - Statement of Work
 
 ## Introduzione
-L'obiettivo di questo progetto consiste nell'analizzare ed implementare una tecnica di **steganografia audio**, che permette quindi di nascondere informazioni (da qui in poi *messaggi*) all'interno di tracce audio.
+L'obiettivo di questo progetto consiste nell'analizzare ed implementare una tecnica di **steganografia audio**, che permette quindi di nascondere informazioni all'interno di tracce audio.
 
 La problematica principale risulta essere  l'effettivo inserimento di informazioni senza che l'utente che riproduce la traccia modificata sia in grado di distinguerla da quella originale.
 
@@ -23,15 +23,15 @@ Il codificatore riceve in input la traccia originale, il messaggio da nascondere
 ### La decodifica
 Il decodificatore riceve in input la traccia originale, la lunghezza del messaggio, la traccia modificata e **la stessa chiave** utilizzata per la codifica, per generare la stessa sequenza ausiliaria. Il decodificatore confronta le due tracce audio e se nota differenze allora sulla base della sequenza binaria ausiliaria estrae i bit del messaggio.
 
-## Lavori passati
-La tecnica di Data Echo Hiding è stata presa in considerazione dagli studenti Alessandra Zullo, Gabriele Lombardi e Marco Villani il cui progetto, **Data Echo Hiding**, risulta essere la base del nostro lavoro. 
+## Il punto di partenza
+La tecnica di Data Echo Hiding è stata presa in considerazione dagli studenti Alessandra Zullo, Gabriele Lombardi e Marco Villani il cui progetto, **Data Audio Hiding**, risulta essere la base del lavoro che andremo a svolgere. 
 
 ## Lavoro proposto
-Gli autori del lavoro originale hanno concentrato i loro sforzi sull'implementazione della sopracitata tecnica di Amplitude Hiding, fornendo per l'Echo Hiding solamente un'implementazione incompleta e non funzionante.
+Gli autori del lavoro originale hanno concentrato i loro sforzi sull'implementazione della tecnica di Amplitude Hiding, fornendo per l'**Echo Hiding** solamente un'implementazione **incompleta** e **non funzionante**.
 
-Lo scopo del nostro lavoro consiste principalmente nella re-implementazione di questa tecnica così come appare nello studio originale di H. B. Dieu, con le seguenti variazioni:
+Lo scopo del nostro lavoro consiste principalmente nella re-implementazione della tecnica di **Echo Hiding** così come appare nello studio originale di H. B. Dieu, integrando le seguenti variazioni:
 
-1. Cifratura del messaggio tramite l'algoritmo AES per migliorare ulteriormente la sicurezza dello schema;
+1. Cifratura preliminare del messaggio da nascondere per migliorare ulteriormente la sicurezza dello schema;
 2. Variazione dello schema di embedding originale mediante distribuzione dell'eco su tutta la traccia e non solamente nella parte iniziale.
 
 Lo schema da noi proposto consiste in due moduli:
