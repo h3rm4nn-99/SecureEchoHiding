@@ -28,6 +28,7 @@ samples_per_frame = 1024
 original_track = AudioSegment.from_wav(filepath)
 original_track = original_track.split_to_mono()[0]
 encoded_track = AudioSegment.from_wav(filepath_encoded)
+encoded_track = encoded_track.split_to_mono()[0]
 
 original_samples = original_track.get_array_of_samples()
 encoded_samples = encoded_track.get_array_of_samples()

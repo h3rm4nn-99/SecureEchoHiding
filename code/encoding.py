@@ -37,10 +37,12 @@ print("KEY ENCODER " + str(R_sequence))
 
 echoed_song = AudioSegment.empty()
 original_song = AudioSegment.from_wav(filepath)
+original_song_R = original_song.split_to_mono()[1]
 original_song = original_song.split_to_mono()[0]
 
-loudness = -10
-delay = 1
+
+loudness = -20
+delay = 2
 
 original_song_frame_number = int(len(original_song.get_array_of_samples()))
 available_bits = original_song_frame_number / samples_per_frame
@@ -83,7 +85,8 @@ print("Lunghezza traccia modificata " + str(len(echoed_song.get_array_of_samples
 print("Lunghezza messaggio: " + str(len(message_bitarray)))
 print("Messaggio: " + str(message_bitarray))
 
+echoed_song_export = AudioSegment.from_mono_audiosegments(echoed_song, original_song_R)
 
 if not os.path.exists("output"):
     os.mkdir("output")
-echoed_song.export('./output/echoed_song.wav', format='wav')
+echoed_song_export.export('./output/echoed_song.wav', format='wav')
