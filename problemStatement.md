@@ -29,10 +29,10 @@ La tecnica di Data Echo Hiding è stata presa in considerazione dagli studenti A
 ## Lavoro proposto
 Gli autori del lavoro originale hanno concentrato i loro sforzi sull'implementazione della tecnica di Amplitude Hiding, fornendo per l'**Echo Hiding** solamente un'implementazione **incompleta** e **non funzionante**.
 
-Lo scopo del nostro lavoro consiste principalmente nella re-implementazione della tecnica di **Echo Hiding** così come appare nello studio originale di H. B. Dieu, integrando le seguenti variazioni:
+Lo scopo del nostro lavoro consiste principalmente nella re-implementazione della tecnica di **Echo Hiding** così come appare nello studio originale di H. B. Dieu:
 
-1. Cifratura preliminare del messaggio da nascondere per migliorare ulteriormente la sicurezza dello schema;
-2. Variazione dello schema di embedding originale mediante distribuzione dell'eco su tutta la traccia e non solamente nella parte iniziale.
+1. Cifrando preliminarmente il messaggio da nascondere per migliorare ulteriormente la sicurezza dello schema;
+2. Studiando il comportamento dello schema di embedding nel caso di embedding messaggi più lunghi.
 
 Lo schema da noi proposto consiste in due moduli:
 
