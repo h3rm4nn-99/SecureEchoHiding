@@ -47,11 +47,17 @@ print("KEY DECODER " + str(R_sequence))
 
 count = 0
 binary_message = ''
-i = 0
+start_index = 0
+end_index = start_index + samples_per_frame
+skip = 0
 while count < message_length:
-    start_index = i * samples_per_frame
-    end_index = (i + 1) * samples_per_frame
-    i += 1
+    
+    if skip:
+        skip = (skip + 1) % 3
+        start_index = end_index
+        end_index = end_index + samples_per_frame
+
+        continue
 
     current_portion_to_analyze_original_song = original_samples[start_index:end_index]
     current_portion_to_analyze_echoed_song = encoded_samples[start_index:end_index]
@@ -73,7 +79,11 @@ while count < message_length:
         elif not R_sequence[count]:
             binary_message += '0'
     count += 1
+    skip = (skip + 1) % 3
+    start_index = end_index
+    end_index = end_index + samples_per_frame
 
+print(binary_message)
 binary_int = int(binary_message, 2)
 byte_number = binary_int.bit_length() + 7 // 8
 binary_array = binary_int.to_bytes(byte_number, "big")

@@ -17,6 +17,7 @@ filepath = args.filepath
 message = args.message
 
 samples_per_frame = 1024
+step_size = 2
 
 message_size = len(message)
 
@@ -44,40 +45,55 @@ original_song = original_song.split_to_mono()[0]
 loudness = -20
 delay = 2
 
-original_song_frame_number = int(len(original_song.get_array_of_samples()))
-available_bits = original_song_frame_number / samples_per_frame
+original_song_sample_number = int(len(original_song.get_array_of_samples()))
+original_song_frames = original_song_sample_number / samples_per_frame
 
-if (available_bits < frame_da_modificare):
-    print("Non sono disponibili abbastanza frame per nascondere il messaggio")
+available_frames = original_song_frames / step_size
+
+if (available_frames < frame_da_modificare):
+    print("La lunghezza del messaggio supera il numero di frame della traccia audio. Impossibile procedere.")
     sys.exit(0)
 
-count = 0
-for i in range(0, frame_da_modificare):
-    start_index = i * samples_per_frame
-    end_index = (i+1) * samples_per_frame
-    count += samples_per_frame
+frames_edited = 0
+skip = 0
+start_index = 0
+end_index = start_index + samples_per_frame
+while frames_edited < frame_da_modificare:
+    if skip:
+        slice_da_modificare = original_song.get_sample_slice(start_index, end_index)
+        echoed_song = echoed_song + slice_da_modificare
+        skip = (skip + 1) % 3
+        start_index = end_index
+        end_index = end_index + samples_per_frame
+
+        continue
+        
+
+    slice_da_modificare = original_song.get_sample_slice(start_index, end_index)
     
-    frame_da_modificare = original_song.get_sample_slice(start_index, end_index)
-    
-    if R_sequence[i]:
-        if not message_bitarray[i]:
-            frame_da_modificare = frame_da_modificare.overlay(frame_da_modificare.apply_gain(loudness), position=delay)
+    if R_sequence[frames_edited]:
+        if not message_bitarray[frames_edited]:
+            slice_da_modificare = slice_da_modificare.overlay(slice_da_modificare.apply_gain(loudness), position=delay)
     else:
-        if message_bitarray[i]:
-            frame_da_modificare = frame_da_modificare.overlay(frame_da_modificare.apply_gain(loudness), position=delay)
+        if message_bitarray[frames_edited]:
+            slice_da_modificare = slice_da_modificare.overlay(slice_da_modificare.apply_gain(loudness), position=delay)
     
-    frame_da_modificare_array = frame_da_modificare.get_array_of_samples()
-    frame_da_modificare_length = len(frame_da_modificare.get_array_of_samples())
+    slice_da_modificare_array = slice_da_modificare.get_array_of_samples()
+    slice_da_modificare_length = len(slice_da_modificare.get_array_of_samples())
     
-    if frame_da_modificare_length < samples_per_frame:
-        to_append_samples = frame_da_modificare_array[len(frame_da_modificare_array) - (samples_per_frame - len(frame_da_modificare_array)):]
+    if slice_da_modificare_length < samples_per_frame:
+        to_append_samples = slice_da_modificare_array[len(slice_da_modificare_array) - (samples_per_frame - len(slice_da_modificare_array)):]
         to_append = AudioSegment(data=to_append_samples.tobytes(), sample_width = original_song.sample_width, frame_rate = original_song.frame_rate, channels=1)
-        frame_da_modificare = frame_da_modificare + to_append
+        slice_da_modificare = slice_da_modificare + to_append
 
-    echoed_song = echoed_song + frame_da_modificare
+    echoed_song = echoed_song + slice_da_modificare
+    frames_edited += 1
+    skip = (skip + 1) % 3
+    start_index = end_index
+    end_index = end_index + samples_per_frame
     
 
-echoed_song = echoed_song + original_song.get_sample_slice(count, original_song_frame_number)
+echoed_song = echoed_song + original_song.get_sample_slice(end_index - samples_per_frame, original_song_sample_number)
 
 print("Lunghezza traccia originale " + str(len(original_song.get_array_of_samples())) + " samples, " + str(len(original_song)) + " ms")
 print("Lunghezza traccia modificata " + str(len(echoed_song.get_array_of_samples())) + " samples, " + str(len(echoed_song)) + " ms")
