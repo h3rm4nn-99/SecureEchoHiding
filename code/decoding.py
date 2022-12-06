@@ -1,5 +1,6 @@
 from pydub import AudioSegment
 from bitarray import bitarray
+from Crypto.Cipher import AES
 import utils as utils
 import argparse
 import binascii
@@ -11,6 +12,8 @@ parser.add_argument('--filepath_encoded', type=str, required=False)
 parser.add_argument('--seed', type=int, required=True)
 parser.add_argument('--a', type=int, required=True)
 parser.add_argument('--message_length', type=int, required=True)
+parser.add_argument('--aes_key_path', type=str, required= True)
+parser.add_argument('--nonce_path', type=str, required= True)
 args = parser.parse_args()
 
 if not args.filepath_encoded is None:
@@ -22,6 +25,20 @@ filepath = args.filepath
 current_number = int(args.seed)
 a_key = args.a
 message_length = int(args.message_length)
+aes_key_path = args.aes_key_path
+nonce_path = args.nonce_path
+
+f = open(aes_key_path, 'rb')
+aes_key = f.read()
+f.close()
+
+f = open(nonce_path, 'rb')
+nonce = f.read()
+f.close()
+
+print(aes_key)
+print(nonce)
+
 
 samples_per_frame = 1024
 frames_to_skip = 1
@@ -84,11 +101,18 @@ while count < message_length:
     start_index = end_index
     end_index = end_index + samples_per_frame
 
-print(binary_message)
-binary_int = int(binary_message, 2)
-byte_number = binary_int.bit_length() + 7 // 8
-binary_array = binary_int.to_bytes(byte_number, "big")
-ascii_message = binary_array.decode()
+decipher = AES.new(aes_key, AES.MODE_CTR, nonce=nonce) 
 
-print("Messaggio binario: " + binary_message)
-print("Messaggio decodificato: " + ascii_message)
+plaintext = decipher.decrypt(bytes(binary_message,'utf-8'))
+
+print(plaintext)
+
+print(plaintext.decode())
+#print(binary_message)
+#binary_int = int(binary_message, 2)
+#byte_number = binary_int.bit_length() + 7 // 8
+#binary_array = binary_int.to_bytes(byte_number, "big")
+#ascii_message = binary_array.decode()
+
+#print("Messaggio binario: " + binary_message)
+#print("Messaggio decodificato: " + ascii_message)

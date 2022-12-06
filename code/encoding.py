@@ -1,5 +1,6 @@
 from pydub import AudioSegment
 from bitarray import bitarray
+from Crypto.Cipher import AES
 import argparse
 import sys
 import os
@@ -9,20 +10,43 @@ parser.add_argument('--message', type=str, required=True)
 parser.add_argument('--filepath', type=str, required=True)
 parser.add_argument('--seed', type=int, required=True)
 parser.add_argument('--a', type=int, required=True)
+parser.add_argument('--aes_key', type=str, required=True)
+
 args = parser.parse_args()
 
 current_number = args.seed
 a_key = int(args.a) 
 filepath = args.filepath
 message = args.message
-
+aes_key = args.aes_key
 samples_per_frame = 1024
 frames_to_skip = 1
 
 message_size = len(message)
 
+if(len(aes_key) > 16):
+    aes_key = aes_key[0:16]
+else: 
+   print("errore")
+   exit(-1) 
+
+
+aes_key = bytes(aes_key,'utf-8')
+
+f = open("key.bin",'wb')
+f.write(aes_key)
+
+cipher = AES.new(aes_key, AES.MODE_CTR)
+
+
+ciphertext = cipher.encrypt(bytes(message,'utf-8'))
+
+f = open("nonce.bin", 'wb')
+f.write(cipher.nonce)
+
+
 message_bitarray = bitarray()
-message_bitarray.frombytes(message.encode('utf-8'))
+message_bitarray.frombytes(ciphertext)
 frame_da_modificare = len(message_bitarray)
 R_sequence = bitarray(frame_da_modificare)
 
