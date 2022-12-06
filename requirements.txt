@@ -1,3 +1,4 @@
 pydub
 bitarray
 ffmpeg
+pycryptodome
