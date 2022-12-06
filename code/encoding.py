@@ -26,8 +26,8 @@ message_size = len(message)
 
 if(len(aes_key) > 16):
     aes_key = aes_key[0:16]
-else: 
-   print("errore")
+elif (len(aes_key) < 16): 
+   print("La chiave è troppo piccola")
    exit(-1) 
 
 
@@ -44,6 +44,9 @@ ciphertext = cipher.encrypt(bytes(message,'utf-8'))
 f = open("nonce.bin", 'wb')
 f.write(cipher.nonce)
 
+decipher = AES.new(aes_key, AES.MODE_CTR, nonce=cipher.nonce)
+plaintext = decipher.decrypt(ciphertext)
+print(plaintext.decode('utf-8'))
 
 message_bitarray = bitarray()
 message_bitarray.frombytes(ciphertext)

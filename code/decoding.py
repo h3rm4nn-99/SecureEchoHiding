@@ -36,10 +36,6 @@ f = open(nonce_path, 'rb')
 nonce = f.read()
 f.close()
 
-print(aes_key)
-print(nonce)
-
-
 samples_per_frame = 1024
 frames_to_skip = 1
 
@@ -101,18 +97,10 @@ while count < message_length:
     start_index = end_index
     end_index = end_index + samples_per_frame
 
-decipher = AES.new(aes_key, AES.MODE_CTR, nonce=nonce) 
+decipher = AES.new(aes_key, AES.MODE_CTR, nonce=nonce)
+binary_message_in_bytes = int(binary_message, 2).to_bytes((len(binary_message) + 7) // 8, 'big')
 
-plaintext = decipher.decrypt(bytes(binary_message,'utf-8'))
+plaintext = decipher.decrypt(binary_message_in_bytes)
 
-print(plaintext)
-
-print(plaintext.decode())
-#print(binary_message)
-#binary_int = int(binary_message, 2)
-#byte_number = binary_int.bit_length() + 7 // 8
-#binary_array = binary_int.to_bytes(byte_number, "big")
-#ascii_message = binary_array.decode()
-
-#print("Messaggio binario: " + binary_message)
-#print("Messaggio decodificato: " + ascii_message)
+print("Messaggio binario: " + binary_message)
+print("Messaggio decodificato: " + plaintext.decode('utf-8'))
