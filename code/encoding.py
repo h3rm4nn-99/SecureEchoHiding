@@ -17,7 +17,7 @@ filepath = args.filepath
 message = args.message
 
 samples_per_frame = 1024
-step_size = 2
+frames_to_skip = 1
 
 message_size = len(message)
 
@@ -34,7 +34,6 @@ for i in range(0, frame_da_modificare):
     else:
         R_sequence[i] = False
 
-print("KEY ENCODER " + str(R_sequence))
 
 echoed_song = AudioSegment.empty()
 original_song = AudioSegment.from_wav(filepath)
@@ -48,10 +47,10 @@ delay = 2
 original_song_sample_number = int(len(original_song.get_array_of_samples()))
 original_song_frames = original_song_sample_number / samples_per_frame
 
-available_frames = original_song_frames / step_size
+available_frames = original_song_frames // (frames_to_skip + 1)
 
 if (available_frames < frame_da_modificare):
-    print("La lunghezza del messaggio supera il numero di frame della traccia audio. Impossibile procedere.")
+    print("La lunghezza del messaggio supera il numero di frame della traccia audio. Impossibile procedere. Frame disponibili: " + str(available_frames) + ". Bit da nascondere: " + str(frame_da_modificare))
     sys.exit(0)
 
 frames_edited = 0
@@ -62,7 +61,7 @@ while frames_edited < frame_da_modificare:
     if skip:
         slice_da_modificare = original_song.get_sample_slice(start_index, end_index)
         echoed_song = echoed_song + slice_da_modificare
-        skip = (skip + 1) % 3
+        skip = (skip + 1) % (frames_to_skip + 1)
         start_index = end_index
         end_index = end_index + samples_per_frame
 
@@ -88,7 +87,7 @@ while frames_edited < frame_da_modificare:
 
     echoed_song = echoed_song + slice_da_modificare
     frames_edited += 1
-    skip = (skip + 1) % 3
+    skip = (skip + 1) % (frames_to_skip + 1)
     start_index = end_index
     end_index = end_index + samples_per_frame
     

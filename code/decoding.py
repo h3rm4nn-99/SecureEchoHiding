@@ -24,6 +24,7 @@ a_key = args.a
 message_length = int(args.message_length)
 
 samples_per_frame = 1024
+frames_to_skip = 1
 
 original_track = AudioSegment.from_wav(filepath)
 original_track = original_track.split_to_mono()[0]
@@ -53,7 +54,7 @@ skip = 0
 while count < message_length:
     
     if skip:
-        skip = (skip + 1) % 3
+        skip = (skip + 1) % (frames_to_skip + 1)
         start_index = end_index
         end_index = end_index + samples_per_frame
 
@@ -79,7 +80,7 @@ while count < message_length:
         elif not R_sequence[count]:
             binary_message += '0'
     count += 1
-    skip = (skip + 1) % 3
+    skip = (skip + 1) % (frames_to_skip + 1)
     start_index = end_index
     end_index = end_index + samples_per_frame
 
