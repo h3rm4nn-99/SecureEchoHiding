@@ -13,7 +13,6 @@ parser.add_argument('--seed', type=int, required=True)
 parser.add_argument('--a', type=int, required=True)
 parser.add_argument('--message_length', type=int, required=True)
 parser.add_argument('--aes_key_path', type=str, required= True)
-parser.add_argument('--nonce_path', type=str, required= True)
 args = parser.parse_args()
 
 if not args.filepath_encoded is None:
@@ -26,23 +25,25 @@ current_number = int(args.seed)
 a_key = args.a
 message_length = int(args.message_length)
 aes_key_path = args.aes_key_path
-nonce_path = args.nonce_path
 
 f = open(aes_key_path, 'rb')
 aes_key = f.read()
 f.close()
 
-f = open(nonce_path, 'rb')
-nonce = f.read()
-f.close()
 
 samples_per_frame = 1024
 frames_to_skip = 1
 
 original_track = AudioSegment.from_wav(filepath)
-original_track = original_track.split_to_mono()[0]
+original_track_channels = original_track.split_to_mono()
+original_track = original_track_channels[0]
+original_track_right = original_track_channels[1]
+
+# Nonce
 encoded_track = AudioSegment.from_wav(filepath_encoded)
-encoded_track = encoded_track.split_to_mono()[0]
+encoded_track_channels = encoded_track.split_to_mono()
+encoded_track = encoded_track_channels[0]
+encoded_track_right = encoded_track_channels[1]
 
 original_samples = original_track.get_array_of_samples()
 encoded_samples = encoded_track.get_array_of_samples()
@@ -97,9 +98,67 @@ while count < message_length:
     start_index = end_index
     end_index = end_index + samples_per_frame
 
-decipher = AES.new(aes_key, AES.MODE_CTR, nonce=nonce)
 binary_message_in_bytes = int(binary_message, 2).to_bytes((len(binary_message) + 7) // 8, 'big')
 
+print("Estrazione testo cifrato completata. Estraggo ora il nonce per la decifratura")
+
+original_samples_right = original_track_right.get_array_of_samples()
+encoded_samples_right = encoded_track_right.get_array_of_samples()
+
+N_sequence = bitarray(64) # we know that nonce is always 64 bit long so no problem here hardcoding that value
+
+current_number = int(args.seed)
+for i in range(0, 64):
+    current_number = (a_key * current_number + 2 * a_key) % 64
+
+    if current_number % 6 > 2:
+        N_sequence[i] = True
+    else:
+        N_sequence[i] = False
+
+count = 0
+nonce_binary_string = ''
+start_index = 0
+end_index = start_index + samples_per_frame
+skip = 0
+
+while count < 64:
+    if skip:
+        skip = (skip + 1) % (frames_to_skip + 1)
+        start_index = end_index
+        end_index = end_index + samples_per_frame
+
+        continue
+
+    current_portion_to_analyze_original_song_right = original_samples_right[start_index:end_index]
+    current_portion_to_analyze_echoed_song_right = encoded_samples_right[start_index:end_index]
+
+    different = False
+    for j in range(0, len(current_portion_to_analyze_original_song_right)):
+        if (current_portion_to_analyze_original_song_right[j] != current_portion_to_analyze_echoed_song_right[j]):
+            different = True
+            break
+
+    if different:
+        if N_sequence[count]:
+            nonce_binary_string += '0'
+        elif not N_sequence[count]:
+            nonce_binary_string += '1'
+    elif not different:
+        if N_sequence[count]:
+            nonce_binary_string += '1'
+        elif not N_sequence[count]:
+            nonce_binary_string += '0'
+    
+    count += 1
+    skip = (skip + 1) % (frames_to_skip + 1)
+    start_index = end_index
+    end_index = end_index + samples_per_frame
+
+nonce = int(nonce_binary_string, 2).to_bytes((len(nonce_binary_string) + 7) // 8, 'big')
+
+    
+decipher = AES.new(aes_key, AES.MODE_CTR, nonce=nonce)
 plaintext = decipher.decrypt(binary_message_in_bytes)
 
 print("Messaggio binario: " + binary_message)
