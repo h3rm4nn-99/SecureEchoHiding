@@ -27,7 +27,7 @@ message_size = len(message)
 if(len(aes_key) > 16):
     aes_key = aes_key[0:16]
 elif (len(aes_key) < 16): 
-   print("La chiave è troppo piccola")
+   print("The key is too small")
    exit(-1) 
 
 
@@ -49,11 +49,11 @@ plaintext = decipher.decrypt(ciphertext)
 
 message_bitarray = bitarray()
 message_bitarray.frombytes(ciphertext)
-frame_da_modificare = len(message_bitarray)
-R_sequence = bitarray(frame_da_modificare)
+frame_to_edit = len(message_bitarray)
+R_sequence = bitarray(frame_to_edit)
 
-for i in range(0, frame_da_modificare):
-    current_number = (a_key * current_number + 2*a_key) % frame_da_modificare
+for i in range(0, frame_to_edit):
+    current_number = (a_key * current_number + 2*a_key) % frame_to_edit
 
     if current_number % 6 > 2:
         R_sequence[i] = True
@@ -76,18 +76,18 @@ original_song_frames = original_song_sample_number / samples_per_frame
 
 available_frames = original_song_frames // (frames_to_skip + 1)
 
-if (available_frames < frame_da_modificare):
-    print("La lunghezza del messaggio supera il numero di frame della traccia audio. Impossibile procedere. Frame disponibili: " + str(available_frames) + ". Bit da nascondere: " + str(frame_da_modificare))
+if (available_frames < frame_to_edit):
+    print("Message length is greater than frames in the audio tracko. Unable to proceed. Available frames: " + str(available_frames) + ". Bit to hide: " + str(frame_to_edit))
     sys.exit(-1)
 
 frames_edited = 0
 skip = 0
 start_index = 0
 end_index = start_index + samples_per_frame
-while frames_edited < frame_da_modificare:
+while frames_edited < frame_to_edit:
     if skip:
-        slice_da_modificare = original_song.get_sample_slice(start_index, end_index)
-        echoed_song = echoed_song + slice_da_modificare
+        slice_to_edit = original_song.get_sample_slice(start_index, end_index)
+        echoed_song = echoed_song + slice_to_edit
         skip = (skip + 1) % (frames_to_skip + 1)
         start_index = end_index
         end_index = end_index + samples_per_frame
@@ -95,24 +95,24 @@ while frames_edited < frame_da_modificare:
         continue
         
 
-    slice_da_modificare = original_song.get_sample_slice(start_index, end_index)
+    slice_to_edit = original_song.get_sample_slice(start_index, end_index)
     
     if R_sequence[frames_edited]:
         if not message_bitarray[frames_edited]:
-            slice_da_modificare = slice_da_modificare.overlay(slice_da_modificare.apply_gain(loudness), position=delay)
+            slice_to_edit = slice_to_edit.overlay(slice_to_edit.apply_gain(loudness), position=delay)
     else:
         if message_bitarray[frames_edited]:
-            slice_da_modificare = slice_da_modificare.overlay(slice_da_modificare.apply_gain(loudness), position=delay)
+            slice_to_edit = slice_to_edit.overlay(slice_to_edit.apply_gain(loudness), position=delay)
     
-    slice_da_modificare_array = slice_da_modificare.get_array_of_samples()
-    slice_da_modificare_length = len(slice_da_modificare.get_array_of_samples())
+    slice_to_edit_array = slice_to_edit.get_array_of_samples()
+    slice_to_edit_length = len(slice_to_edit.get_array_of_samples())
     
-    if slice_da_modificare_length < samples_per_frame:
-        to_append_samples = slice_da_modificare_array[len(slice_da_modificare_array) - (samples_per_frame - len(slice_da_modificare_array)):]
+    if slice_to_edit_length < samples_per_frame:
+        to_append_samples = slice_to_edit_array[len(slice_to_edit_array) - (samples_per_frame - len(slice_to_edit_array)):]
         to_append = AudioSegment(data=to_append_samples.tobytes(), sample_width = original_song.sample_width, frame_rate = original_song.frame_rate, channels=1)
-        slice_da_modificare = slice_da_modificare + to_append
+        slice_to_edit = slice_to_edit + to_append
 
-    echoed_song = echoed_song + slice_da_modificare
+    echoed_song = echoed_song + slice_to_edit
     frames_edited += 1
     skip = (skip + 1) % (frames_to_skip + 1)
     start_index = end_index
@@ -161,32 +161,32 @@ skip = 0
 
 while frames_edited < nonce_bitarray_length:
     if skip:
-        slice_da_modificare = original_song_R.get_sample_slice(start_index, end_index)
-        nonce_song = nonce_song + slice_da_modificare
+        slice_to_edit = original_song_R.get_sample_slice(start_index, end_index)
+        nonce_song = nonce_song + slice_to_edit
         skip = (skip + 1) % (frames_to_skip + 1)
         start_index = end_index
         end_index = end_index + samples_per_frame
 
         continue
 
-    slice_da_modificare = original_song_R.get_sample_slice(start_index, end_index)
+    slice_to_edit = original_song_R.get_sample_slice(start_index, end_index)
 
     if N_sequence[frames_edited]:
         if not nonce_bitarray[frames_edited]:
-            slice_da_modificare = slice_da_modificare.overlay(slice_da_modificare.apply_gain(loudness), position=delay)
+            slice_to_edit = slice_to_edit.overlay(slice_to_edit.apply_gain(loudness), position=delay)
     else:
         if nonce_bitarray[frames_edited]:
-            slice_da_modificare = slice_da_modificare.overlay(slice_da_modificare.apply_gain(loudness), position=delay)
+            slice_to_edit = slice_to_edit.overlay(slice_to_edit.apply_gain(loudness), position=delay)
     
-    slice_da_modificare_array = slice_da_modificare.get_array_of_samples()
-    slice_da_modificare_length = len(slice_da_modificare_array)
+    slice_to_edit_array = slice_to_edit.get_array_of_samples()
+    slice_to_edit_length = len(slice_to_edit_array)
 
-    if slice_da_modificare_length < samples_per_frame:
-        to_append_samples = slice_da_modificare_array[len(slice_da_modificare_array) - (samples_per_frame - len(slice_da_modificare_array)):]
+    if slice_to_edit_length < samples_per_frame:
+        to_append_samples = slice_to_edit_array[len(slice_to_edit_array) - (samples_per_frame - len(slice_to_edit_array)):]
         to_append = AudioSegment(data=to_append_samples.tobytes(), sample_width = original_song.sample_width, frame_rate = original_song.frame_rate, channels=1)
-        slice_da_modificare = slice_da_modificare + to_append
+        slice_to_edit = slice_to_edit + to_append
     
-    nonce_song = nonce_song + slice_da_modificare
+    nonce_song = nonce_song + slice_to_edit
     frames_edited += 1
     skip = (skip + 1) % (frames_to_skip + 1)
     start_index = end_index
@@ -194,7 +194,7 @@ while frames_edited < nonce_bitarray_length:
 
 nonce_song = nonce_song + original_song_R.get_sample_slice(end_index - samples_per_frame, right_channel_sample_number)
 
-print("Embedding nonce completato")
+print("Nonce embedding completed")
 
 print("Lunghezza traccia originale (canale destro) " + str(len(original_song_R.get_array_of_samples())) + " samples, " + str(len(original_song_R)) + " ms")
 print("Lunghezza traccia modificata (canale destro) " + str(len(nonce_song.get_array_of_samples())) + " samples, " + str(len(nonce_song)) + " ms")

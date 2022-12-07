@@ -161,5 +161,5 @@ nonce = int(nonce_binary_string, 2).to_bytes((len(nonce_binary_string) + 7) // 8
 decipher = AES.new(aes_key, AES.MODE_CTR, nonce=nonce)
 plaintext = decipher.decrypt(binary_message_in_bytes)
 
-print("Messaggio binario: " + binary_message)
-print("Messaggio decodificato: " + plaintext.decode('utf-8'))
+print("Binary message: " + binary_message)
+print("Decoded message: " + plaintext.decode('utf-8'))
