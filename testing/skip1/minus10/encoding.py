@@ -5,6 +5,10 @@ import argparse
 import sys
 import os
 
+# --- Parameters ---
+# Loudness: -10
+# Frames to skip: 1
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--message', type=str, required=True)
 parser.add_argument('--filepath', type=str, required=True)
@@ -33,16 +37,15 @@ elif (len(aes_key) < 16):
 
 aes_key = bytes(aes_key,'utf-8')
 
-f = open("key.bin",'wb')
+if not os.path.exists("output"):
+    os.mkdir("output")
+f = open("./output/key.bin",'wb')
 f.write(aes_key)
 
 cipher = AES.new(aes_key, AES.MODE_CTR)
 ciphertext = cipher.encrypt(bytes(message,'utf-8'))
 
 nonce = cipher.nonce
-
-f = open("nonce.bin", 'wb')
-f.write(nonce)
 
 decipher = AES.new(aes_key, AES.MODE_CTR, nonce=nonce)
 plaintext = decipher.decrypt(ciphertext)
@@ -205,7 +208,4 @@ print("Nonce: " + str(nonce))
 
 
 echoed_song_export = AudioSegment.from_mono_audiosegments(echoed_song, nonce_song)
-
-if not os.path.exists("output"):
-    os.mkdir("output")
 echoed_song_export.export('./output/echoed_song.wav', format='wav')

@@ -7,13 +7,16 @@ import binascii
 import sys
 import os
 
+# --- Parameters ---
+# Frames to skip: 2
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--filepath', type=str, required=True)
 parser.add_argument('--filepath_encoded', type=str, required=False)
 parser.add_argument('--seed', type=int, required=True)
 parser.add_argument('--a', type=int, required=True)
 parser.add_argument('--message_length', type=int, required=True)
-parser.add_argument('--aes_key_path', type=str, required= False)
+parser.add_argument('--aes_key_path', type=str, required=False)
 args = parser.parse_args()
 
 if not args.filepath_encoded is None:
@@ -44,7 +47,7 @@ f.close()
 
 
 samples_per_frame = 1024
-frames_to_skip = 1
+frames_to_skip = 2
 
 original_track = AudioSegment.from_wav(filepath)
 original_track_channels = original_track.split_to_mono()

@@ -7,13 +7,16 @@ import binascii
 import sys
 import os
 
+# --- Parameters ---
+# Frames to skip: 1
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--filepath', type=str, required=True)
 parser.add_argument('--filepath_encoded', type=str, required=False)
 parser.add_argument('--seed', type=int, required=True)
 parser.add_argument('--a', type=int, required=True)
 parser.add_argument('--message_length', type=int, required=True)
-parser.add_argument('--aes_key_path', type=str, required= False)
+parser.add_argument('--aes_key_path', type=str, required=False)
 args = parser.parse_args()
 
 if not args.filepath_encoded is None:
