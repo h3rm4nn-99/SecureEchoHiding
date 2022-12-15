@@ -206,6 +206,7 @@ print("Nonce: " + str(nonce))
 
 echoed_song_export = AudioSegment.from_mono_audiosegments(echoed_song, nonce_song)
 
+
 if not os.path.exists("output"):
     os.mkdir("output")
-echoed_song_export.export('./output/echoed_song.wav', format='wav')
+echoed_song_export.export('./output/echoed_'+filepath, format='wav')
