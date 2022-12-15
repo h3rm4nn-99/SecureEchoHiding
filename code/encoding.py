@@ -4,6 +4,7 @@ from Crypto.Cipher import AES
 import argparse
 import sys
 import os
+import pathlib
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--message', type=str, required=True)
@@ -23,6 +24,7 @@ samples_per_frame = 1024
 frames_to_skip = 1
 
 message_size = len(message)
+filename = pathlib.Path(filepath).name
 
 if(len(aes_key) > 16):
     aes_key = aes_key[0:16]
@@ -209,4 +211,4 @@ echoed_song_export = AudioSegment.from_mono_audiosegments(echoed_song, nonce_son
 
 if not os.path.exists("output"):
     os.mkdir("output")
-echoed_song_export.export('./output/echoed_'+filepath, format='wav')
+echoed_song_export.export('./output/echoed_' + filename, format='wav')
