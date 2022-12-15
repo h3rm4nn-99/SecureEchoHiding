@@ -20,7 +20,7 @@ filepath = args.filepath
 message = args.message
 aes_key = args.aes_key
 samples_per_frame = 1024
-frames_to_skip = 1
+frames_to_skip = 2
 
 message_size = len(message)
 

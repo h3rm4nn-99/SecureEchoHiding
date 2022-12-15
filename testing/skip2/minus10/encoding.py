@@ -20,7 +20,7 @@ filepath = args.filepath
 message = args.message
 aes_key = args.aes_key
 samples_per_frame = 1024
-frames_to_skip = 1
+frames_to_skip = 2
 
 message_size = len(message)
 
@@ -68,7 +68,7 @@ original_song = channels[0]
 original_song_R = channels[1]
 
 
-loudness = -20
+loudness = -10
 delay = 1
 
 original_song_sample_number = int(len(original_song.get_array_of_samples()))

@@ -68,7 +68,7 @@ original_song = channels[0]
 original_song_R = channels[1]
 
 
-loudness = -20
+loudness = -10
 delay = 1
 
 original_song_sample_number = int(len(original_song.get_array_of_samples()))

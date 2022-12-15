@@ -156,10 +156,9 @@ while count < 64:
     end_index = end_index + samples_per_frame
 
 nonce = int(nonce_binary_string, 2).to_bytes((len(nonce_binary_string) + 7) // 8, 'big')
-
     
 decipher = AES.new(aes_key, AES.MODE_CTR, nonce=nonce)
 plaintext = decipher.decrypt(binary_message_in_bytes)
 
 print("Binary message: " + binary_message)
-print("Decoded message: " + plaintext.decode('utf-8'))
+print("Decoded message: " + plaintext.decode())
